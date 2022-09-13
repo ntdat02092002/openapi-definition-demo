@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Openapi CDA
+  description: openapi definition demo
+  version: 1.0.0
+servers:
+  - url: 'https://cdn.contentful.com'
+tags: []
+paths:
+  /spaces/{space_id}?access_token={access_token}:
+    get:
+      tags: []
+      summary: get a space
+      description: return a single space
+      operationId: get_space
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/access-token'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+        '404':
+          description: Space not found
+        '429':
+          description: Too Many Requests
+
+  /spaces/{space_id}/environments/{environment_id}/content_types?access_token={access_token}:
+    get:
+      tags: []
+      summary: Get the content model of a space
+      description: Return content model of a space
+      operationId: get_content_model
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/environment-id'
+        - $ref: '#/components/parameters/access-token'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: "#/components/schemas/CollectionResources"
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ContentType"
+        '404':
+          description: Content model not found
+        '429':
+          description: Too Many Requests
+
+  /spaces/{space_id}/environments/{environment_id}/content_types/{content_type_id}?access_token={access_token}:
+    get:
+      tags: []
+      summary: Get a single content type
+      description: Return single content type by id
+      operationId: get_single_content_type
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/environment-id'
+        - $ref: '#/components/parameters/content-type-id'
+        - $ref: '#/components/parameters/access-token'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentType'
+        '404':
+          description: Content type not found
+        '429':
+          description: Too Many Requests
+
+
+components:
+  schemas:
+    Sys:
+      title: sys property
+      description: an object containing system managed metadata
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date
+    Locale:
+      title: locale
+      description: Locales allow you to define translatable content for assets and entries
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+          pattern: '\.[a-z]{2}-[A-Z]{2}$'
+          example: en-GB
+        fallbackCode:
+          type: string
+          pattern: '\.[a-z]{2}-[A-Z]{2}$'
+          example: en-GB
+        default:
+          type: boolean
+    Space:
+      title: Space
+      description: Each space has a name, a set of locales, and metadata about the space
+      type: object
+      required:
+        - sys
+        - name
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        name:
+          type: string
+        locales:
+          type: array
+          items:
+            $ref: '#/components/schemas/Locale'
+    CollectionResources:
+      title: Collection Resources
+      description: a wrapper object that contains extra information useful for paginating over large result sets
+      type: object
+      required:
+        - sys
+        - skip
+        - limit
+        - total
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        skip:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+    ContentType:
+      title: Content type
+      description: A content type consists of a set of fields and other information
+      type: object
+      required:
+        - sys
+        - name
+        - fields
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        name:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentTypeField'
+        displayField:
+          type: string
+          description: ID of main field used for display
+        description:
+          type: string
+    ContentTypeField:
+      title: Content Type Field
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - required
+        - localized
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        required:
+          type: boolean
+        localized:
+          type: boolean
+        items:
+          $ref: '#/components/schemas/ItemOfContenTypeField'
+        linkType:
+          type: string
+    ItemOfContenTypeField:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        validations:
+          type: string
+        linkContentType:
+          type: string
+        linkType:
+          type: string
+
+  parameters:
+    space-id:
+      name: space_id
+      in: path
+      description: Alphanumeric id of the space to retrieve
+      required: true
+      schema:
+        type: string
+        example: yadj1kx9rmg0
+    access-token:
+      name: access_token
+      in: query
+      description: A production Content Delivery API key
+      schema:
+        type: string
+        example: fdb4e7a3102747a02ea69ebac5e282b9e44d28fb340f778a4f5e788625a61abe
+    environment-id:
+      name: environment_id
+      in: path
+      description: ID of the environment in form of a string
+      required: true
+      schema:
+        type: string
+        example: staging
+    content-type-id:
+      name: content_type_id
+      in: path
+      required: true
+      description: ID of the content type in form of a string
+      schema:
+        type: string
+        example: 2PqfXUJwE8qSYKuM0U6w8M

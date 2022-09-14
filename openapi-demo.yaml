@@ -7,7 +7,7 @@ servers:
   - url: 'https://cdn.contentful.com'
 tags: []
 paths:
-  /spaces/{space_id}?access_token={access_token}:
+  /spaces/{space_id}:
     get:
       tags: []
       summary: get a space
@@ -15,7 +15,7 @@ paths:
       operationId: get_space
       parameters:
         - $ref: '#/components/parameters/space-id'
-        - $ref: '#/components/parameters/access-token'
+        # - $ref: '#/components/parameters/access-token'
       responses:
         '200':
           description: OK
@@ -28,7 +28,7 @@ paths:
         '429':
           description: Too Many Requests
 
-  /spaces/{space_id}/environments/{environment_id}/content_types?access_token={access_token}:
+  /spaces/{space_id}/environments/{environment_id}/content_types:
     get:
       tags: []
       summary: Get the content model of a space
@@ -37,7 +37,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/space-id'
         - $ref: '#/components/parameters/environment-id'
-        - $ref: '#/components/parameters/access-token'
+        # - $ref: '#/components/parameters/access-token'
       responses:
         '200':
           description: OK
@@ -57,7 +57,7 @@ paths:
         '429':
           description: Too Many Requests
 
-  /spaces/{space_id}/environments/{environment_id}/content_types/{content_type_id}?access_token={access_token}:
+  /spaces/{space_id}/environments/{environment_id}/content_types/{content_type_id}:
     get:
       tags: []
       summary: Get a single content type
@@ -67,7 +67,7 @@ paths:
         - $ref: '#/components/parameters/space-id'
         - $ref: '#/components/parameters/environment-id'
         - $ref: '#/components/parameters/content-type-id'
-        - $ref: '#/components/parameters/access-token'
+        # - $ref: '#/components/parameters/access-token'
       responses:
         '200':
           description: OK
@@ -220,13 +220,13 @@ components:
       schema:
         type: string
         example: yadj1kx9rmg0
-    access-token:
-      name: access_token
-      in: query
-      description: A production Content Delivery API key
-      schema:
-        type: string
-        example: fdb4e7a3102747a02ea69ebac5e282b9e44d28fb340f778a4f5e788625a61abe
+    # access-token:
+    #   name: access_token
+    #   in: query
+    #   description: A production Content Delivery API key
+    #   schema:
+    #     type: string
+    #     example: fdb4e7a3102747a02ea69ebac5e282b9e44d28fb340f778a4f5e788625a61abe
     environment-id:
       name: environment_id
       in: path
@@ -243,3 +243,12 @@ components:
       schema:
         type: string
         example: 2PqfXUJwE8qSYKuM0U6w8M
+
+  securitySchemes:
+    accessToken:
+      type: apiKey
+      in: header
+      name: Authorization
+
+security:
+  - accessToken: []

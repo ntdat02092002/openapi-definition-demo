@@ -49,9 +49,7 @@ paths:
                   - $ref: "#/components/schemas/CollectionResources"
                 properties:
                   items:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/ContentType"
+                    $ref: "#/components/schemas/ContentTypeCollection"
         '404':
           description: Content model not found
         '429':
@@ -80,6 +78,54 @@ paths:
         '429':
           description: Too Many Requests
 
+  /spaces/{space_id}/environments/{environment_id}/entries:
+    get:
+      tags: []
+      summary: Get all entries of a Space
+      description: Return all entries of a Space
+      operationId: get_entries
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/environment-id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: "#/components/schemas/CollectionResources"
+                properties:
+                  items:
+                    $ref: "#/components/schemas/EntryCollection"
+                  includes:
+                    $ref: "#/components/schemas/LinkedItems"
+        '429':
+          description: Too Many Requests
+
+  /spaces/{space_id}/environments/{environment_id}/entries/{entry_id}:
+    get:
+      tags: []
+      summary: Get a single entry
+      description: Return a single entry of a Space
+      operationId: get_single_entry
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/environment-id'
+        - $ref: '#/components/parameters/entry-id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '404':
+          description: Entry type not found
+        '429':
+          description: Too Many Requests
+
 
 components:
   schemas:
@@ -97,6 +143,8 @@ components:
         createdAt:
           type: string
           format: date
+        visibility:
+          type: string
     Locale:
       title: locale
       description: Locales allow you to define translatable content for assets and entries
@@ -210,6 +258,63 @@ components:
           type: string
         linkType:
           type: string
+    ContentTypeCollection:
+      type: array
+      items:
+        $ref: '#/components/schemas/ContentType'
+    Metadata:
+      title: metadate
+      description: User-controlled metadata
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+    Entry:
+      type: object
+      title: Entry
+      description: Entries represent anything defined as a Content Type in a space
+      required:
+        - sys
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        # fields base on definition of content type which entry represent
+        fields:
+          type: object
+          additionalProperties: true
+    EntryCollection:
+      type: array
+      items:
+        $ref: '#/components/schemas/Entry'
+    LinkedItems:
+      type: object
+      properties:
+        Entry:
+          type: array
+          items:
+            $ref: "#/components/schemas/Entry"
+        Asset:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+    Tag:
+      title: tag
+      type: object
+      properties:
+        name:
+          type: string
+        sys:
+          $ref: '#/components/schemas/Sys'
+    Asset:
+      type: object
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+
 
   parameters:
     space-id:
@@ -243,6 +348,14 @@ components:
       schema:
         type: string
         example: 2PqfXUJwE8qSYKuM0U6w8M
+    entry-id:
+      name: entry_id
+      in: path
+      required: true
+      description: ID of the entry in form of a string
+      schema:
+        type: string
+        example: 5KsDBWseXY6QegucYAoacS
 
   securitySchemes:
     accessToken:

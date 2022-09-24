@@ -1,0 +1,235 @@
+openapi: 3.0.0
+info:
+  title: Openapi CMA
+  description: openapi definition demo
+  version: 1.0.0
+servers:
+  - url: 'https://api.contentful.com'
+tags: []
+paths:
+  /spaces:
+    get:
+      tags: []
+      summary: get all space
+      description: Get all spaces an account has access to
+      operationId: get_all_space
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - $ref: "#/components/schemas/CollectionResources"
+                properties:
+                  items:
+                    $ref: "#/components/schemas/SpaceCollection"
+        '429':
+          description: Too Many Requests
+    post:
+      tags: []
+      summary: Create a space
+      description: Create a space
+      operationId: create_space
+      parameters:
+        - $ref: '#/components/parameters/contentful-organization'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+        '429':
+          description: Too Many Requests
+      requestBody:
+        $ref: '#/components/requestBodies/SpaceRequest'
+
+  /spaces/{space_id}:
+    get:
+      tags: []
+      summary: get a space
+      description: return a single space
+      operationId: get_space
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+        '404':
+          description: Space not found
+        '429':
+          description: Too Many Requests
+    put:
+      tags: []
+      summary: Update a space name
+      description: Update a space name
+      operationId: update_space_name
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+        - $ref: '#/components/parameters/contentful-organization'
+        - $ref: '#/components/parameters/contentful-version'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+        '429':
+          description: Too Many Requests
+      requestBody:
+        $ref: '#/components/requestBodies/SpaceRequest'
+    delete:
+      tags: []
+      summary: Delete a space name
+      description: Delete a space name
+      operationId: delete_space
+      parameters:
+        - $ref: '#/components/parameters/space-id'
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Space not found
+        '429':
+          description: Too Many Requests
+
+
+components:
+  schemas:
+    ResourceId:
+      title: id resource
+      description: When creating resources, you can specify an ID
+      type: string
+      pattern: '/^[a-zA-Z0-9-_.]{1,64}$/'
+    Sys:
+      title: sys property
+      description: an object containing system managed metadata
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        version:
+          type: integer
+    CollectionResources:
+      title: Collection Resources
+      description: a wrapper object that contains extra information useful for paginating over large result sets
+      type: object
+      required:
+        - sys
+        - skip
+        - limit
+        - total
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        skip:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+    Locale:
+      title: locale
+      description: Locales allow you to define translatable content for assets and entries
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+          pattern: '\.[a-z]{2}-[A-Z]{2}$'
+          example: en-GB
+        fallbackCode:
+          type: string
+          pattern: '\.[a-z]{2}-[A-Z]{2}$'
+          example: en-GB
+        default:
+          type: boolean
+    Space:
+      title: Space
+      description: Each space has a name, a set of locales, and metadata about the space
+      type: object
+      required:
+        - sys
+        - name
+      properties:
+        sys:
+          $ref: '#/components/schemas/Sys'
+        name:
+          type: string
+        # locales:
+        #   type: array
+        #   items:
+        #     $ref: '#/components/schemas/Locale'
+    SpaceCollection:
+      type: array
+      items:
+        $ref: '#/components/schemas/Space'
+    SpaceRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        defaultLocale:
+          type: string
+
+
+  parameters:
+    space-id:
+      name: space_id
+      in: path
+      description: ID of the Space in form of a string
+      required: true
+      schema:
+        type: string
+        example: yadj1kx9rmg0
+    contentful-organization:
+      name: X-Contentful-Organization
+      in: header
+      schema:
+        type: string
+    contentful-version:
+      name: X-Contentful-Version
+      in: header
+      required: true
+      schema:
+        type: integer
+
+
+  requestBodies:
+    SpaceRequest:
+      content:
+        application/vnd.contentful.management.v1+json:
+          schema:
+            $ref: '#/components/schemas/SpaceRequest'
+      description: student object that needs to be added to the database
+      required: true
+
+
+  securitySchemes:
+    accessToken:
+      type: apiKey
+      in: header
+      name: Authorization
+
+security:
+  - accessToken: []
